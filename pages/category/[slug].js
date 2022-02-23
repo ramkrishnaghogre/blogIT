@@ -1,17 +1,24 @@
 import React from 'react';
+import Head from 'next/head';
+
 import { useRouter } from 'next/router';
 
 import { getCategories, getCategoryPost } from '../../services';
 import { PostCard, Categories, Loader } from '../../components';
 
-const CategoryPost = ({ posts }) => {
+const CategoryPost = ({ posts, currentTitle }) => {
     const router = useRouter();
 
     if (router.isFallback) {
         return <Loader />;
     }
+    return (<div>
 
-    return (
+        <Head>
+            <title>{posts.length !== 0 ? posts[0].node.categories[0].name : "BlogIT"}</title>
+            <meta name="Categories" content={posts.length !== 0 ? posts[0].node.categories[0].name : "BlogIT"} />
+            <link rel="icon" href="/favicon.png" />
+        </Head>
         <div className="container mx-auto px-10 mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="col-span-1 lg:col-span-8">
@@ -26,21 +33,19 @@ const CategoryPost = ({ posts }) => {
                 </div>
             </div>
         </div>
+    </div>
     );
 };
 export default CategoryPost;
 
-// Fetch data at build time
 export async function getStaticProps({ params }) {
     const posts = await getCategoryPost(params.slug);
-
+    const currentTitle = params.slug
     return {
-        props: { posts },
+        props: { posts, currentTitle },
     };
 }
 
-// Specify dynamic routes to pre-render pages based on data.
-// The HTML is generated at build time and will be reused on each request.
 export async function getStaticPaths() {
     const categories = await getCategories();
     return {
